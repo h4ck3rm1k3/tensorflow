@@ -42,8 +42,10 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from tensorflow.models.rnn.translate import data_utils
-from tensorflow.models.rnn.translate import seq2seq_model
+#from tensorflow.models.rnn.translate import data_utils
+#from tensorflow.models.rnn.translate import seq2seq_model
+import data_utils
+import seq2seq_model
 
 
 tf.app.flags.DEFINE_float("learning_rate", 0.5, "Learning rate.")
@@ -57,8 +59,8 @@ tf.app.flags.DEFINE_integer("size", 1024, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 3, "Number of layers in the model.")
 tf.app.flags.DEFINE_integer("en_vocab_size", 40000, "English vocabulary size.")
 tf.app.flags.DEFINE_integer("fr_vocab_size", 40000, "French vocabulary size.")
-tf.app.flags.DEFINE_string("data_dir", "/tmp", "Data directory")
-tf.app.flags.DEFINE_string("train_dir", "/tmp", "Training directory.")
+tf.app.flags.DEFINE_string("data_dir", "data", "Data directory")
+tf.app.flags.DEFINE_string("train_dir", "train", "Training directory.")
 tf.app.flags.DEFINE_integer("max_train_data_size", 0,
                             "Limit on the size of training data (0: no limit).")
 tf.app.flags.DEFINE_integer("steps_per_checkpoint", 200,
@@ -147,16 +149,17 @@ def train():
   en_train, fr_train, en_dev, fr_dev, _, _ = data_utils.prepare_wmt_data(
       FLAGS.data_dir, FLAGS.en_vocab_size, FLAGS.fr_vocab_size)
 
+  # Read data into buckets and compute their sizes.
+  print ("Reading development and training data (limit: %d)."
+           % FLAGS.max_train_data_size)
+  dev_set = read_data(en_dev, fr_dev)
+  train_set = read_data(en_train, fr_train, FLAGS.max_train_data_size)
+
   with tf.Session() as sess:
     # Create model.
     print("Creating %d layers of %d units." % (FLAGS.num_layers, FLAGS.size))
     model = create_model(sess, False)
 
-    # Read data into buckets and compute their sizes.
-    print ("Reading development and training data (limit: %d)."
-           % FLAGS.max_train_data_size)
-    dev_set = read_data(en_dev, fr_dev)
-    train_set = read_data(en_train, fr_train, FLAGS.max_train_data_size)
     train_bucket_sizes = [len(train_set[b]) for b in xrange(len(_buckets))]
     train_total_size = float(sum(train_bucket_sizes))
 
