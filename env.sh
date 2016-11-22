@@ -1,0 +1,20 @@
+export COMPUTECPP_TOOLKIT_PATH=/opt/codeplay/ComputeCpp-CE-0.1.1-Linux
+export CUDA_DNN_LIB_PATH=/opt/cudnn/cuda
+export CUDA_RT_LIB_PATH=x86_64-linux-gnu/libcudart.so.8.0
+export CUDA_TOOLKIT_PATH=/usr
+export CUDNN_INSTALL_PATH=/opt/cudnn/cuda
+export GCC_HOST_COMPILER_PATH=/usr/bin/gcc-5
+#/usr/bin/gcc
+export PATH=$PATH:/sbin/
+export PYTHON_BIN_PATH=/usr/bin/python3.5
+export PYTHON_LIB_PATH=/usr/local/lib/python3.5/dist-packages
+export TF_CUDA_VERSION=8.0
+export TF_CUDNN_VERSION=5
+export TF_NEED_CUDA=1
+export TF_NEED_GCP=0
+export TF_NEED_HDFS=0
+export TF_NEED_OPENCL=1
+export TF_CUDA_COMPUTE_CAPABILITIES="3.5,5.2"
+export HOST_CXX_COMPILER=/usr/bin/g++
+export HOST_C_COMPILER=/usr/bin/gcc
+export PATH=$PATH:/home/mdupont/experiments/bazel/output/
