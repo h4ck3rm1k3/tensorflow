@@ -207,7 +207,8 @@ while true; do
   if is_windows; then
     CUDA_RT_LIB_PATH="lib/x64/cudart.lib"
   elif [ "$OSNAME" == "Linux" ]; then
-    CUDA_RT_LIB_PATH="lib64/libcudart.so${TF_CUDA_EXT}"
+      #CUDA_RT_LIB_PATH="lib64/libcudart.so${TF_CUDA_EXT}"
+      CUDA_RT_LIB_PATH="lib/x86_64-linux-gnu/libcudart.so${TF_CUDA_EXT}"
   elif [ "$OSNAME" == "Darwin" ]; then
     CUDA_RT_LIB_PATH="lib/libcudart${TF_CUDA_EXT}.dylib"
   fi

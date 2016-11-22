@@ -25,8 +25,8 @@ _TF_CUDA_COMPUTE_CAPABILITIES = "TF_CUDA_COMPUTE_CAPABILITIES"
 
 _DEFAULT_CUDA_VERSION = ""
 _DEFAULT_CUDNN_VERSION = ""
-_DEFAULT_CUDA_TOOLKIT_PATH = "/usr/local/cuda"
-_DEFAULT_CUDNN_INSTALL_PATH = "/usr/local/cuda"
+_DEFAULT_CUDA_TOOLKIT_PATH = "/opt/cudnn/cuda"
+_DEFAULT_CUDNN_INSTALL_PATH = "/opt/cudnn/cuda"
 _DEFAULT_CUDA_COMPUTE_CAPABILITIES = ["3.5", "5.2"]
 
 
@@ -212,15 +212,15 @@ def _cuda_symlink_files(cpu_value, cuda_version, cudnn_version):
   cudnn_ext = ".%s" % cudnn_version if cudnn_version else ""
   if cpu_value == "Linux":
     return struct(
-        cuda_lib_path = "lib64",
-        cuda_rt_lib = "lib64/libcudart.so%s" % cuda_ext,
-        cuda_rt_lib_static = "lib64/libcudart_static.a",
-        cuda_blas_lib = "lib64/libcublas.so%s" % cuda_ext,
+        cuda_lib_path = "lib/x86_64-linux-gnu",
+        cuda_rt_lib = "lib/x86_64-linux-gnu/libcudart.so%s" % cuda_ext,
+        cuda_rt_lib_static = "lib/x86_64-linux-gnu/libcudart_static.a",
+        cuda_blas_lib = "lib/x86_64-linux-gnu/libcublas.so%s" % cuda_ext,
         cuda_dnn_lib = "lib64/libcudnn.so%s" % cudnn_ext,
         cuda_dnn_lib_alt = "libcudnn.so%s" % cudnn_ext,
-        cuda_rand_lib = "lib64/libcurand.so%s" % cuda_ext,
-        cuda_fft_lib = "lib64/libcufft.so%s" % cuda_ext,
-        cuda_cupti_lib = "extras/CUPTI/lib64/libcupti.so%s" % cuda_ext)
+        cuda_rand_lib = "lib/x86_64-linux-gnu/libcurand.so%s" % cuda_ext,
+        cuda_fft_lib = "lib/x86_64-linux-gnu/libcufft.so%s" % cuda_ext,
+        cuda_cupti_lib = "lib/x86_64-linux-gnu/libcupti.so%s" % cuda_ext)
   elif cpu_value == "Darwin":
     return struct(
         cuda_lib_path = "lib",
@@ -453,11 +453,9 @@ def _create_cuda_repository(repository_ctx):
                cuda_toolkit_path + "/" + symlink_files.cuda_lib_path,
                "cuda/" + symlink_files.cuda_lib_path)
   _symlink_dir(repository_ctx, cuda_toolkit_path + "/bin", "cuda/bin")
-  _symlink_dir(repository_ctx, cuda_toolkit_path + "/nvvm", "cuda/nvvm")
-  _symlink_dir(repository_ctx, cuda_toolkit_path + "/extras/CUPTI/include",
-               "cuda/extras/CUPTI/include")
-  repository_ctx.symlink(cuda_toolkit_path + "/" + symlink_files.cuda_cupti_lib,
-                         "cuda/" + symlink_files.cuda_cupti_lib)
+#  _symlink_dir(repository_ctx, cuda_toolkit_path + "/nvvm", "cuda/nvvm")
+#  _symlink_dir(repository_ctx, cuda_toolkit_path + "/extras/CUPTI/include",               "cuda/extras/CUPTI/include")
+#  repository_ctx.symlink(cuda_toolkit_path + "/" + symlink_files.cuda_cupti_lib,                         "cuda/" + symlink_files.cuda_cupti_lib)
 
   # Set up the symbolic links for cudnn if cudnn was was not installed to
   # CUDA_TOOLKIT_PATH.
