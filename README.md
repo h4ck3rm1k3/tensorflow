@@ -66,7 +66,12 @@ Hello, TensorFlow!
 The TensorFlow community has created amazing things with TensorFlow, please see the [resources section of tensorflow.org](https://www.tensorflow.org/versions/master/resources#community) for an incomplete list.
 
 
-## Hacks
+## Hacked install
+
+
+. /env.sh
+
+./configure
 
 ln -s /home/mdupont/.cache/bazel/_bazel_mdupont/cd1c359a0f897a12f2b0754121ddc2b1 BAZEL
 
@@ -81,3 +86,5 @@ ln -s /usr/lib/x86_64-linux-gnu/libcupti.so.8.0 BAZEL/external/local_config_cuda
 
 
 bazel build -c opt --config=cuda //tensorflow/tools/pip_package:build_pip_package --verbose_failures
+
+bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
