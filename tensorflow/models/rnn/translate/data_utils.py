@@ -22,7 +22,7 @@ import gzip
 import os
 import re
 import tarfile
-
+import pprint
 from six.moves import urllib
 
 from tensorflow.python.platform import gfile
@@ -41,8 +41,8 @@ EOS_ID = 2
 UNK_ID = 3
 
 # Regular expressions used to tokenize.
-_WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
-_DIGIT_RE = re.compile(br"\d")
+_WORD_SPLIT = re.compile("([.,!?\"':;)(])")
+_DIGIT_RE = re.compile(r"\d")
 
 # URLs for WMT data.
 #_WMT_ENFR_TRAIN_URL = "http://www.statmt.org/wmt10/training-giga-fren.tar"
@@ -108,6 +108,7 @@ def basic_tokenizer(sentence):
   """Very basic tokenizer: split the sentence into a list of tokens."""
   words = []
   for space_separated_fragment in sentence.strip().split():
+    pprint.pprint (space_separated_fragment)
     words.extend(_WORD_SPLIT.split(space_separated_fragment))
   return [w for w in words if w]
 
@@ -240,6 +241,8 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
           counter += 1
           if counter % 100000 == 0:
             print("  tokenizing line %d" % counter)
+          print("read %s" % line)
+          print("vocab %s" % vocab)
           token_ids = sentence_to_token_ids(line, vocab, tokenizer,
                                             normalize_digits)
           tokens_file.write(" ".join([str(tok) for tok in token_ids]) + "\n")
