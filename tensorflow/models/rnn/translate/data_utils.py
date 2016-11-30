@@ -29,10 +29,10 @@ from tensorflow.python.platform import gfile
 import tensorflow as tf
 
 # Special vocabulary symbols - we always put them at the start.
-_PAD = b"_PAD"
-_GO = b"_GO"
-_EOS = b"_EOS"
-_UNK = b"_UNK"
+_PAD = "_PAD"
+_GO = "_GO"
+_EOS = "_EOS"
+_UNK = "_UNK"
 _START_VOCAB = [_PAD, _GO, _EOS, _UNK]
 
 PAD_ID = 0
@@ -41,7 +41,7 @@ EOS_ID = 2
 UNK_ID = 3
 
 # Regular expressions used to tokenize.
-_WORD_SPLIT = re.compile("([.,!?\"':;)(])")
+_WORD_SPLIT = re.compile(r"([.,!?\"':;)(]\t)")
 _DIGIT_RE = re.compile(r"\d")
 
 # URLs for WMT data.
@@ -63,27 +63,9 @@ def maybe_download(directory, filename, url):
     print("Succesfully downloaded", filename, statinfo.st_size, "bytes")
   return filepath
 
-
-def gunzip_file(gz_path, new_path):
-  """Unzips from gz_path into new_path."""
-  print("Unpacking %s to %s" % (gz_path, new_path))
-  with gzip.open(gz_path, "rb") as gz_file:
-    with open(new_path, "wb") as new_file:
-      for line in gz_file:
-        new_file.write(line)
-
-
 def get_wmt_enfr_train_set(directory):
   """Download the WMT en-fr training corpus to directory unless it's there."""
   train_path = os.path.join(directory, "giga-fren.release2.fixed")
-  # if not (gfile.Exists(train_path +".fr") and gfile.Exists(train_path +".en")):
-  #   corpus_file = maybe_download(directory, "training-giga-fren.tar",
-  #                                _WMT_ENFR_TRAIN_URL)
-  #   print("Extracting tar file %s" % corpus_file)
-  #   with tarfile.open(corpus_file, "r") as corpus_tar:
-  #     corpus_tar.extractall(directory)
-  #   gunzip_file(train_path + ".fr.gz", train_path + ".fr")
-  #   gunzip_file(train_path + ".en.gz", train_path + ".en")
   return train_path
 
 
@@ -91,16 +73,6 @@ def get_wmt_enfr_dev_set(directory):
   """Download the WMT en-fr training corpus to directory unless it's there."""
   dev_name = "newstest2013"
   dev_path = os.path.join(directory, dev_name)
-  # if not (gfile.Exists(dev_path + ".fr") and gfile.Exists(dev_path + ".en")):
-  #   dev_file = maybe_download(directory, "dev-v2.tgz", _WMT_ENFR_DEV_URL)
-  #   print("Extracting tgz file %s" % dev_file)
-  #   with tarfile.open(dev_file, "r:gz") as dev_tar:
-  #     fr_dev_file = dev_tar.getmember("dev/" + dev_name + ".fr")
-  #     en_dev_file = dev_tar.getmember("dev/" + dev_name + ".en")
-  #     fr_dev_file.name = dev_name + ".fr"  # Extract without "dev/" prefix.
-  #     en_dev_file.name = dev_name + ".en"
-  #     dev_tar.extract(fr_dev_file, directory)
-  #     dev_tar.extract(en_dev_file, directory)
   return dev_path
 
 
@@ -108,7 +80,7 @@ def basic_tokenizer(sentence):
   """Very basic tokenizer: split the sentence into a list of tokens."""
   words = []
   for space_separated_fragment in sentence.strip().split():
-    pprint.pprint (space_separated_fragment)
+    #pprint.pprint (space_separated_fragment)
     words.extend(_WORD_SPLIT.split(space_separated_fragment))
   return [w for w in words if w]
 
@@ -134,7 +106,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
   if not gfile.Exists(vocabulary_path):
     print("Creating vocabulary %s from data %s" % (vocabulary_path, data_path))
     vocab = {}
-    with gfile.GFile(data_path, mode="rb") as f:
+    with gfile.GFile(data_path, mode="r") as f:
       counter = 0
       for line in f:
         counter += 1
@@ -143,7 +115,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
         line = tf.compat.as_bytes(line)
         tokens = tokenizer(line) if tokenizer else basic_tokenizer(line)
         for w in tokens:
-          word = _DIGIT_RE.sub(b"0", w) if normalize_digits else w
+          word = _DIGIT_RE.sub("0", w) if normalize_digits else w
           if word in vocab:
             vocab[word] += 1
           else:
@@ -151,9 +123,9 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
       vocab_list = _START_VOCAB + sorted(vocab, key=vocab.get, reverse=True)
       if len(vocab_list) > max_vocabulary_size:
         vocab_list = vocab_list[:max_vocabulary_size]
-      with gfile.GFile(vocabulary_path, mode="wb") as vocab_file:
+      with gfile.GFile(vocabulary_path, mode="w") as vocab_file:
         for w in vocab_list:
-          vocab_file.write(w + b"\n")
+          vocab_file.write(w + "\n")
 
 
 def initialize_vocabulary(vocabulary_path):
@@ -177,7 +149,7 @@ def initialize_vocabulary(vocabulary_path):
   """
   if gfile.Exists(vocabulary_path):
     rev_vocab = []
-    with gfile.GFile(vocabulary_path, mode="rb") as f:
+    with gfile.GFile(vocabulary_path, mode="r") as f:
       rev_vocab.extend(f.readlines())
     rev_vocab = [line.strip() for line in rev_vocab]
     vocab = dict([(x, y) for (y, x) in enumerate(rev_vocab)])
@@ -212,7 +184,7 @@ def sentence_to_token_ids(sentence, vocabulary,
   if not normalize_digits:
     return [vocabulary.get(w, UNK_ID) for w in words]
   # Normalize digits by 0 before looking words up in the vocabulary.
-  return [vocabulary.get(_DIGIT_RE.sub(b"0", w), UNK_ID) for w in words]
+  return [vocabulary.get(_DIGIT_RE.sub("0", w), UNK_ID) for w in words]
 
 
 def data_to_token_ids(data_path, target_path, vocabulary_path,
@@ -234,15 +206,15 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
   if not gfile.Exists(target_path):
     print("Tokenizing data in %s" % data_path)
     vocab, _ = initialize_vocabulary(vocabulary_path)
-    with gfile.GFile(data_path, mode="rb") as data_file:
+    with gfile.GFile(data_path, mode="r") as data_file:
       with gfile.GFile(target_path, mode="w") as tokens_file:
         counter = 0
         for line in data_file:
           counter += 1
           if counter % 100000 == 0:
             print("  tokenizing line %d" % counter)
-          print("read %s" % line)
-          print("vocab %s" % vocab)
+          #print("read %s" % line)
+          #print("vocab %s" % vocab)
           token_ids = sentence_to_token_ids(line, vocab, tokenizer,
                                             normalize_digits)
           tokens_file.write(" ".join([str(tok) for tok in token_ids]) + "\n")
