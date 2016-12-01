@@ -241,7 +241,7 @@ def decode():
     sentence = sys.stdin.readline()
     while sentence:
       # Get token-ids for the input sentence.
-      token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), en_vocab)
+      token_ids = data_utils.sentence_to_token_ids(sentence, en_vocab)
       # Which bucket does it belong to?
       bucket_id = len(_buckets) - 1
       for i, bucket in enumerate(_buckets):
